@@ -1,0 +1,36 @@
+{
+  "name": "@silverbackbase/range",
+  "version": "0.1.0",
+  "description": "MCP server for Range — local SEO rank tracking for service area businesses and physical stores",
+  "license": "BSL-1.1",
+  "type": "module",
+  "bin": { "range-mcp": "./dist/index.js" },
+  "files": ["dist", ".mcp.json"],
+  "scripts": {
+    "build": "tsc && node scripts/add-shebang.mjs",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "better-sqlite3": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silverbackb/range.git"
+  }
+}

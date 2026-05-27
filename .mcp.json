@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "range": {
+      "command": "npx",
+      "args": ["-y", "@silverbackbase/range"],
+      "env": {
+        "DATAFORSEO_USERNAME": "your-email@example.com",
+        "DATAFORSEO_PASSWORD": "your-dataforseo-password"
+      }
+    }
+  }
+}
