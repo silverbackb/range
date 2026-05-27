@@ -5,8 +5,6 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { parse as parseToml, stringify as stringifyToml } from "smol-toml";
-
 const args = process.argv.slice(2).filter(a => a !== "init");
 const tokenIdx = args.indexOf("--token");
 const cliToken: string | undefined =
@@ -73,51 +71,6 @@ function upsertMcp(configPath: string, token: string) {
   writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
 }
 
-// ─── TOML config helpers (Codex CLI) ─────────────────────────────────────────
-
-function configHasUnifiedMcpToml(configPath: string): boolean {
-  if (!existsSync(configPath)) return false;
-  try {
-    const config = parseToml(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
-    const servers = (config.mcp_servers ?? {}) as Record<string, unknown>;
-    return Object.values(servers).some(s => {
-      const server = s as Record<string, unknown>;
-      return typeof server?.url === "string" && server.url.includes("mcp.silverbackbase.com");
-    });
-  } catch { return false; }
-}
-
-function extractTokenFromConfigToml(configPath: string): string | undefined {
-  if (!existsSync(configPath)) return undefined;
-  try {
-    const config = parseToml(readFileSync(configPath, "utf-8")) as Record<string, unknown>;
-    const servers = (config.mcp_servers ?? {}) as Record<string, unknown>;
-    for (const s of Object.values(servers)) {
-      const server = s as Record<string, unknown>;
-      const headers = server?.http_headers as Record<string, string> | undefined;
-      const auth = headers?.Authorization ?? headers?.authorization;
-      if (auth?.startsWith("Bearer sb_")) return auth.replace("Bearer ", "");
-    }
-  } catch {}
-  return undefined;
-}
-
-function upsertMcpToml(configPath: string, token: string) {
-  let config: Record<string, unknown> = {};
-  if (existsSync(configPath)) {
-    try { config = parseToml(readFileSync(configPath, "utf-8")) as Record<string, unknown>; } catch {}
-  } else {
-    mkdirSync(dirname(configPath), { recursive: true });
-  }
-  const servers = (config.mcp_servers as Record<string, unknown>) ?? {};
-  servers["silverbackbase"] = {
-    url: UNIFIED_MCP_URL,
-    http_headers: { Authorization: `Bearer ${token}` },
-  };
-  config.mcp_servers = servers;
-  writeFileSync(configPath, stringifyToml(config), "utf-8");
-}
-
 // ─── Skill installer ──────────────────────────────────────────────────────────
 
 function installSkills(skillsDir: string): string[] {
@@ -144,18 +97,13 @@ async function main() {
     : join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json");
 
   const mcpClients = [
-    { name: "Claude Code",    path: join(home, ".claude.json"),                              format: "json" as const },
-    { name: "Claude Desktop", path: claudeDesktopPath,                                       format: "json" as const },
-    { name: "Antigravity",    path: join(home, ".gemini", "antigravity", "mcp_config.json"), format: "json" as const },
-    { name: "Codex CLI",      path: join(home, ".codex", "config.toml"),                     format: "toml" as const },
+    { name: "Claude Code",    path: join(home, ".claude.json"),  format: "json" as const },
+    { name: "Claude Desktop", path: claudeDesktopPath,           format: "json" as const },
   ];
 
-  const hasMcp = (c: typeof mcpClients[number]) =>
-    c.format === "toml" ? configHasUnifiedMcpToml(c.path) : configHasUnifiedMcp(c.path);
-  const extractToken = (c: typeof mcpClients[number]) =>
-    c.format === "toml" ? extractTokenFromConfigToml(c.path) : extractTokenFromConfig(c.path);
-  const writeMcp = (c: typeof mcpClients[number], t: string) =>
-    c.format === "toml" ? upsertMcpToml(c.path, t) : upsertMcp(c.path, t);
+  const hasMcp     = (c: typeof mcpClients[number]) => configHasUnifiedMcp(c.path);
+  const extractToken = (c: typeof mcpClients[number]) => extractTokenFromConfig(c.path);
+  const writeMcp   = (c: typeof mcpClients[number], t: string) => upsertMcp(c.path, t);
 
   console.log(`\n  📍 SilverBackBase — Range\n`);
 
@@ -205,13 +153,10 @@ async function main() {
   // Install skills for all detected agent clients
   const skillTargets = [
     { name: "Claude Code", dir: join(home, ".claude", "skills") },
-    { name: "Codex CLI",   dir: join(home, ".agents", "skills"),                  detectedBy: join(home, ".codex", "config.toml") },
-    { name: "Antigravity", dir: join(home, ".gemini", "antigravity", "skills"),   detectedBy: join(home, ".gemini", "antigravity", "mcp_config.json") },
   ];
 
   const skillsInstalled: string[] = [];
   for (const target of skillTargets) {
-    if (target.detectedBy && !existsSync(target.detectedBy)) continue;
     const installed = installSkills(target.dir);
     if (installed.length > 0) skillsInstalled.push(target.name);
   }
