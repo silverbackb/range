@@ -1,16 +1,22 @@
 #!/usr/bin/env node
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import type { MiddlewareHandler } from "hono";
-import {
+if (process.argv.slice(2).includes("init")) {
+  await import("./init.js");
+  process.exit(0);
+}
+
+const { serve } = await import("@hono/node-server");
+const { Hono } = await import("hono");
+const { cors } = await import("hono/cors");
+const {
   migrate,
   insertKeyword, listKeywords, getKeyword, deleteKeyword,
   insertZone, listZones,
   insertCheck, insertPoint, getHistory, getLastCheckPoints, getPreviousCheck,
-} from "./db.js";
-import { generateGrid, parseDensity } from "./grid.js";
-import { checkPoint, checkVolume, qualifyIntent, DELAY_MS, sleep, type BusinessType } from "./dataforseo.js";
+} = await import("./db.js");
+const { generateGrid, parseDensity } = await import("./grid.js");
+const { checkPoint, checkVolume, qualifyIntent, DELAY_MS, sleep } = await import("./dataforseo.js");
+import type { BusinessType } from "./dataforseo.js";
+import type { MiddlewareHandler } from "hono";
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -23,7 +29,6 @@ const requireAuth: MiddlewareHandler = async (c, next) => {
       return c.json({ error: "Unauthorized" }, 401);
     }
   }
-  // x-workspace-id from silverbackbase-mcp (or "local" for self-hosted)
   (c as any).set("workspaceId", c.req.header("x-workspace-id") ?? "local");
   await next();
 };

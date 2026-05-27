@@ -1,6 +1,6 @@
 {
   "name": "@silverbackbase/range",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Range — local SEO rank tracking service (HTTP) for SilverBackBase",
   "license": "BSL-1.1",
   "type": "module",
@@ -9,7 +9,8 @@
     "range": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "scripts": {
     "build": "tsc",
@@ -20,7 +21,8 @@
   "dependencies": {
     "@hono/node-server": "^1.12.0",
     "hono": "^4.3.0",
-    "postgres": "^3.4.0"
+    "postgres": "^3.4.0",
+    "smol-toml": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
