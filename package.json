@@ -4,8 +4,13 @@
   "description": "MCP server for Range — local SEO rank tracking for service area businesses and physical stores",
   "license": "BSL-1.1",
   "type": "module",
-  "bin": { "range-mcp": "./dist/index.js" },
-  "files": ["dist", ".mcp.json"],
+  "bin": {
+    "range-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    ".mcp.json"
+  ],
   "scripts": {
     "build": "tsc && node scripts/add-shebang.mjs",
     "dev": "tsx src/index.ts",
