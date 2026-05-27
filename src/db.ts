@@ -97,7 +97,21 @@ export async function insertKeyword(params: {
   return Number(rows[0].id);
 }
 
-export async function listKeywords(workspaceId: string, accountId: string) {
+export async function listKeywords(workspaceId: string, accountId?: string) {
+  if (accountId) {
+    return sql`
+      SELECT k.*,
+        (SELECT COUNT(*) FROM tracked_zones WHERE keyword_id = k.id)::int AS zone_count,
+        (SELECT checked_at FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_checked,
+        (SELECT avg_position FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_avg_position,
+        (SELECT best_position FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_best_position,
+        (SELECT top3_count FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_top3_count,
+        (SELECT points_total FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_points_total
+      FROM tracked_keywords k
+      WHERE k.workspace_id = ${workspaceId} AND k.account_id = ${accountId} AND k.active = TRUE
+      ORDER BY k.created_at DESC
+    `;
+  }
   return sql`
     SELECT k.*,
       (SELECT COUNT(*) FROM tracked_zones WHERE keyword_id = k.id)::int AS zone_count,
@@ -107,8 +121,8 @@ export async function listKeywords(workspaceId: string, accountId: string) {
       (SELECT top3_count FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_top3_count,
       (SELECT points_total FROM rank_checks WHERE keyword_id = k.id ORDER BY checked_at DESC LIMIT 1) AS last_points_total
     FROM tracked_keywords k
-    WHERE k.workspace_id = ${workspaceId} AND k.account_id = ${accountId} AND k.active = TRUE
-    ORDER BY k.created_at DESC
+    WHERE k.workspace_id = ${workspaceId} AND k.active = TRUE
+    ORDER BY k.account_id, k.created_at DESC
   `;
 }
 

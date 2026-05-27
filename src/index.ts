@@ -89,8 +89,7 @@ app.post("/keywords", requireAuth, async (c) => {
 
 app.get("/keywords", requireAuth, async (c) => {
   const workspaceId = getWid(c);
-  const accountId   = c.req.query("account_id");
-  if (!accountId) return c.json({ error: "account_id query param required" }, 400);
+  const accountId   = c.req.query("account_id") || undefined;
   const keywords = await listKeywords(workspaceId, accountId);
   return c.json(keywords);
 });
