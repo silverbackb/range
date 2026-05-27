@@ -7,6 +7,7 @@ if (process.argv.slice(2).includes("init")) {
 const { serve } = await import("@hono/node-server");
 const { Hono } = await import("hono");
 const { cors } = await import("hono/cors");
+const { readFileSync } = await import("node:fs");
 const {
   migrate,
   insertKeyword, listKeywords, getKeyword, deleteKeyword,
@@ -17,6 +18,9 @@ const { generateGrid, parseDensity } = await import("./grid.js");
 const { checkPoint, checkVolume, qualifyIntent, DELAY_MS, sleep } = await import("./dataforseo.js");
 import type { BusinessType } from "./dataforseo.js";
 import type { MiddlewareHandler } from "hono";
+
+let SERVICE_VERSION = "0.0.0";
+try { SERVICE_VERSION = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf-8")).version; } catch {}
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -58,7 +62,8 @@ app.use("*", async (c, next) => {
   }) + "\n");
 });
 
-app.get("/health", (c) => c.json({ ok: true, service: "range" }));
+app.get("/health",  (c) => c.json({ ok: true, service: "range" }));
+app.get("/version", (c) => c.json({ package: "@silverbackbase/range", version: SERVICE_VERSION }));
 
 // ── Keywords ──────────────────────────────────────────────────────────────────
 

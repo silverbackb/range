@@ -6,6 +6,9 @@ import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 const args = process.argv.slice(2).filter(a => a !== "init");
+
+let PKG_VERSION = "0.0.0";
+try { PKG_VERSION = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf-8")).version; } catch {}
 const tokenIdx = args.indexOf("--token");
 const cliToken: string | undefined =
   tokenIdx !== -1 ? args[tokenIdx + 1] : args.find(a => a.startsWith("--token="))?.split("=")[1];
@@ -69,6 +72,40 @@ function upsertMcp(configPath: string, token: string) {
   };
   config.mcpServers = servers;
   writeFileSync(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
+}
+
+// ─── Version hook installer ───────────────────────────────────────────────────
+
+function installVersionHook(sbbDir: string, claudeSettingsPath: string) {
+  const __dir = dirname(fileURLToPath(import.meta.url));
+  const hookSrc = join(__dir, "..", "assets", "hooks", "range-version-hook.mjs");
+  if (!existsSync(hookSrc)) return;
+
+  mkdirSync(sbbDir, { recursive: true });
+  const hookDest = join(sbbDir, "range-version-hook.mjs");
+  copyFileSync(hookSrc, hookDest);
+
+  let settings: Record<string, unknown> = {};
+  if (existsSync(claudeSettingsPath)) {
+    try { settings = JSON.parse(readFileSync(claudeSettingsPath, "utf-8")); } catch {}
+  } else {
+    mkdirSync(dirname(claudeSettingsPath), { recursive: true });
+  }
+
+  type HookEntry = { matcher: string; hooks: { type: string; command: string }[] };
+  const hooks = (settings.hooks as Record<string, HookEntry[]>) ?? {};
+  const ups   = hooks.UserPromptSubmit ?? [];
+
+  const alreadyInstalled = ups.some(h =>
+    h.hooks?.some(hook => hook.command?.includes("range-version-hook"))
+  );
+
+  if (!alreadyInstalled) {
+    ups.push({ matcher: "*", hooks: [{ type: "command", command: `node "${hookDest}"` }] });
+    hooks.UserPromptSubmit = ups;
+    settings.hooks = hooks;
+    writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+  }
 }
 
 // ─── Skill installer ──────────────────────────────────────────────────────────
@@ -160,6 +197,16 @@ async function main() {
     const installed = installSkills(target.dir);
     if (installed.length > 0) skillsInstalled.push(target.name);
   }
+
+  // Write installed version + seed cache (for update checks)
+  const sbbDir = join(home, ".silverbackbase");
+  mkdirSync(sbbDir, { recursive: true });
+  writeFileSync(join(sbbDir, "range-skill-version"), PKG_VERSION, "utf-8");
+  writeFileSync(join(sbbDir, "range-version-cache.json"), JSON.stringify({ version: PKG_VERSION, checkedAt: Date.now() }), "utf-8");
+
+  // Install update-check hook
+  const claudeSettingsPath = join(home, ".claude", "settings.json");
+  installVersionHook(sbbDir, claudeSettingsPath);
 
   // Summary
   console.log("\n  Range configuré !\n");

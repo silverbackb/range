@@ -109,15 +109,61 @@ country_code: "FR"
 
 ---
 
-## 5. Configuration des mots-clés
+## 5. Qualification et challenge des mots-clés
 
-**Avant de configurer**, lance `range_qualify_intent` sur chaque mot-clé pour vérifier l'intention. Un keyword "produit" (Amazon, Leroy Merlin dans la SERP) ne vaut rien pour un artisan — mieux vaut suggérer une variante service avant de configurer. Voir `range-sbb` pour les règles de qualification complètes.
+**Ne configure jamais un mot-clé sans l'avoir qualifié.** Lance `range_qualify_intent` sur chaque mot-clé fourni par l'utilisateur — même si ça lui paraît évident.
 
-Pour chaque mot-clé validé :
+### Règle de qualification
+
+| Résultat | Action |
+|----------|--------|
+| SERVICE ★★★, Local Pack présent | ✅ Configurer directement |
+| SERVICE ★★☆, Local Pack présent | ✅ Configurer, signaler que la SERP est compétitive |
+| SERVICE ★★☆, sans Local Pack | ⚠️ Qualifier 2–3 variantes avant de décider |
+| MIXED ★★☆ ou ★☆☆ (quelle que soit la présence Local Pack) | 🔴 Challenger obligatoirement — qualifier des alternatives |
+| INFORMATIONAL / PRODUCT | ❌ Ne pas configurer — proposer un remplacement |
+
+### Protocole de challenge (MIXED ou intention faible)
+
+Quand un mot-clé est MIXED ou ★☆☆ :
+
+1. **Ne pas demander l'avis de l'utilisateur** — qualifier immédiatement 2–3 variantes avec `range_qualify_intent`
+2. **Variantes à tester en priorité** (par ordre de test) :
+   - `"entreprise [mot-clé]"` — modifieur B2B / service
+   - `"prestataire [mot-clé]"` — modifieur service fort
+   - `"maintenance [mot-clé]"` ou `"installation [mot-clé]"` — selon le secteur
+   - `"[mot-clé] [ville]"` — géo-modifieur direct
+3. **Présenter un tableau comparatif** avec toutes les options (original inclus)
+4. **Recommander** la meilleure option en expliquant pourquoi — ne pas laisser l'utilisateur choisir sans indication
+
+Exemple de message :
+
+> "Désenfumage" seul a une intention mixte (Wikipedia, Légifrance dans le top 10 — peu de valeur pour un prestataire). J'ai qualifié des alternatives :
+>
+> | Keyword | Intent | Confiance | Local Pack |
+> |---------|--------|-----------|-----------|
+> | entreprise désenfumage | SERVICE | ★★★ | ✅ |
+> | prestataire désenfumage | SERVICE | ★★★ | — |
+> | maintenance désenfumage | SERVICE | ★★☆ | — |
+> | désenfumage (original) | MIXED | ★☆☆ | — |
+>
+> **Je recommande "entreprise désenfumage"** — intention service pure + Local Pack présent. Je le configure à la place ?
+
+### Local Pack comme signal de qualité
+
+Le Local Pack est un signal fort : il indique que Google reconnaît l'intention locale commerciale sur ce mot-clé. **Toujours le mentionner dans le récap** :
+
+- Local Pack présent → signaler `🗺️` et l'expliquer : "Google affiche une carte sur ce terme — les entreprises locales sont prioritaires"
+- Local Pack absent mais SERP service → correct, mais moins de visibilité immédiate
+- Local Pack absent et SERP générique → signal faible, challenger le keyword
+
+### Configuration
+
+Pour chaque mot-clé validé ou sélectionné après challenge :
 
 1. Appelle `range_add_keyword` avec :
    - `account_id` : identifiant du compte
-   - `keyword_base` : le mot-clé
+   - `keyword_base` : le mot-clé **retenu** (pas forcément celui fourni par l'utilisateur)
    - `mode` : `"coverage"` (commerce physique/Maps) ou `"territory"` (SAB/SERP organique)
    - `location_name` : ville principale (ex: `"Paris,France"`)
    - `language_code` : `"fr"`
@@ -162,7 +208,7 @@ Ou demande-moi une analyse à tout moment.
 - `range_check_now` — déclenche la première vérification
 - `range_get_grid` — optionnel, pour afficher la grille du premier check
 - `range_check_volume` — optionnel, si l'utilisateur veut valider le volume avant de configurer
-- `range_qualify_intent` — optionnel, si plusieurs variantes sont proposées et qu'il faut prioriser
+- `range_qualify_intent` — **obligatoire** sur chaque mot-clé avant configuration ; relancer sur les variantes si MIXED/★☆☆
 
 ---
 
