@@ -1,6 +1,6 @@
 const DFS_URL  = "https://api.dataforseo.com/v3/serp/google/organic/live/advanced";
-const DFS_USER = process.env.DATAFORSEO_USERNAME ?? "cvescan@visibleici.fr";
-const DFS_PASS = process.env.DATAFORSEO_PASSWORD ?? "6152ce2442a86242";
+const DFS_USER = process.env.DATAFORSEO_USERNAME ?? "";
+const DFS_PASS = process.env.DATAFORSEO_PASSWORD ?? "";
 
 const AUTH = Buffer.from(`${DFS_USER}:${DFS_PASS}`).toString("base64");
 
