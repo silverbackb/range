@@ -1,5 +1,12 @@
 # Changelog — @silverbackbase/range
 
+## [0.2.4] — 2026-06-02
+
+### Corrigé
+- Skill `range-setup` : frontmatter YAML manquant (`name` + `description`). Sans lui, le loader prenait le titre H1 (« Skill — /range-setup ») comme description → skill mal déclenché. Ajout d'une description riche avec triggers explicites et désambiguïsation vs `range-sbb` (setup/config ≠ consultation).
+
+---
+
 ## [0.1.0] — 2026-05-27
 
 ### Initial release
