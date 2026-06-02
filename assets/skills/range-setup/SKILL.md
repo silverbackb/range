@@ -1,3 +1,8 @@
+---
+name: range-setup
+description: Onboarding et configuration initiale du tracking de positions locales Range pour un compte client — choisit automatiquement le mode (geo-grid vs territory), calibre la grille selon la densité urbaine, ajoute keywords + zones et lance un premier check baseline. Utiliser quand l'utilisateur veut METTRE EN PLACE le suivi : "configure Range pour [client]", "onboarde ce client dans Range", "commence à suivre des mots-clés", "mets en place le suivi local", "ajoute un nouveau groupe de mots-clés", ou ouvre Range pour la première fois sur un compte. Pour CONSULTER ou checker des positions déjà configurées (où on est positionné, évolution, lancer un check), utiliser range-sbb à la place.
+---
+
 # Skill — /range-setup
 
 ## Description
