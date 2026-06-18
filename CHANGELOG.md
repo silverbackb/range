@@ -1,5 +1,13 @@
 # Changelog — @silverbackbase/range
 
+## [0.2.5] — 2026-06-18
+
+### Amélioré
+- Skill `range-setup` : nouvelle règle "SERP à dominante locale" dans la section de qualification des mots-clés. Avant de choisir le mode (`coverage` vs `territory`), vérifier si la SERP est dominée par le pack local. Un pack local écrasant rend le mode `territory` quasi invisible — le mode `coverage` est alors prioritaire.
+- Skill `range-sbb` : étape 0 ajoutée dans le workflow "configurer un nouveau keyword" — lecture de la composition SERP avant de choisir le mode, avec arbre de décision en 4 cas (pack + organiques, pack dominant seul, pas de pack, SERP générique).
+
+---
+
 ## [0.2.4] — 2026-06-02
 
 ### Corrigé

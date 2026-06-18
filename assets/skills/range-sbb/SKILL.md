@@ -75,19 +75,26 @@ La règle s'applique dans les tableaux, titres de section et recommandations. "T
 ## Workflow type — configurer un nouveau keyword
 
 ```
-0. range_qualify_intent([keyword, variantes...])
+0. Lire la SERP du keyword (fenêtre privée) AVANT de choisir le mode
+   → La SERP a un pack local (section "Entreprises" avec carte) ?
+      - Oui + organiques service visibles  → envisager coverage ET territory
+      - Oui + organiques quasi absents     → coverage en priorité, territory optionnel
+      - Non + organiques service           → territory uniquement (GBP ne sert pas sur ce keyword)
+      - Non + SERP générique/info          → ❌ écarter ce keyword
+
+1. range_qualify_intent([keyword, variantes...])
    → Analyser l'intention SERP AVANT de configurer quoi que ce soit
    → Selon le résultat :
       - SERVICE ★★★ → go, configurer directement
       - MIXED       → avertir, proposer une variante plus propre
       - PRODUCT     → déconseiller, suggérer des alternatives avec "installateur" / "pose"
 
-1. range_add_keyword → crée le keyword validé (mode + domaine)
-2. range_add_zone    → ajoute chaque ville cible (territory)
+2. range_add_keyword → crée le keyword validé (mode + domaine)
+3. range_add_zone    → ajoute chaque ville cible (territory)
                     → ou laisser Range générer la grille (coverage, rayon en km)
-3. range_check_now   → lance le check DataForSEO (facturable — estimer le coût avant)
-4. range_get_grid    → détail point par point
-5. range_get_history → évolution dans le temps
+4. range_check_now   → lance le check DataForSEO (facturable — estimer le coût avant)
+5. range_get_grid    → détail point par point
+6. range_get_history → évolution dans le temps
 ```
 
 **Règle de qualification d'intention :**

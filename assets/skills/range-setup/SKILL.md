@@ -162,6 +162,21 @@ Le Local Pack est un signal fort : il indique que Google reconnaît l'intention 
 - Local Pack absent mais SERP service → correct, mais moins de visibilité immédiate
 - Local Pack absent et SERP générique → signal faible, challenger le keyword
 
+### SERP à dominante locale — règle critique avant de choisir le mode
+
+Certains mots-clés déclenchent un pack local si large (carte dépliée + 3 résultats Maps) qu'il ne reste pratiquement aucun résultat organique visible au-dessus du pli. **Dans ce cas, tracker en mode `territory` a peu de valeur** : être #3 organique sous un pack local dominant est quasi invisible pour l'internaute.
+
+**Avant de choisir le mode, lire la SERP :**
+
+| Composition SERP | Mode recommandé | Explication |
+|-----------------|-----------------|-------------|
+| Local Pack dominant + peu d'organiques service | `coverage` en priorité | La visibilité Maps est ce qui compte — l'organique est enterré |
+| Local Pack présent + organiques service visibles | Les deux (`coverage` + `territory`) | Double présence Maps + SERP |
+| Pas de Local Pack + organiques service | `territory` uniquement | Google ne reconnaît pas d'intent local — fiche GBP inutile sur ce keyword |
+| Pas de Local Pack + SERP générique/info | ❌ Écarter ce keyword | Pas d'intent commercial local |
+
+**Signal concret à détecter :** si la SERP du keyword ne contient pas de section "Entreprises" avec carte, le mode `coverage` (GBP/Maps) n'a aucune valeur sur ce terme. Vérifier systématiquement avant de configurer.
+
 ### Configuration
 
 Pour chaque mot-clé validé ou sélectionné après challenge :
